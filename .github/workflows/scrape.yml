@@ -1,0 +1,36 @@
+name: Scrape Grailed Feed
+
+on:
+  schedule:
+    # Every 4 hours. Edit the cron expression to change frequency.
+    - cron: '0 */4 * * *'
+  workflow_dispatch: {}  # lets you trigger a run manually from the Actions tab
+
+permissions:
+  contents: write
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+
+      - name: Run scraper
+        run: python grailed_scraper.py
+
+      - name: Commit updated feed
+        run: |
+          git config user.name "grailed-feed-bot"
+          git config user.email "actions@github.com"
+          git add listings.json
+          git diff --staged --quiet || git commit -m "Update feed $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
