@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Grailed Watch</title>
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink: #1C2226;
+    --ink-2: #262E33;
+    --paper: #EDE6D6;
+    --paper-dim: #8F8A7E;
+    --brass: #C1924A;
+    --moss: #5C6B4F;
+    --line: #3A4147;
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'Inter', -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    padding-bottom: 48px;
+  }
+
+  a { color: inherit; }
+
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--brass);
+  }
+
+  header {
+    padding: 28px 20px 16px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  h1 {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    font-size: clamp(26px, 8vw, 36px);
+    margin: 4px 0 8px;
+    line-height: 1.05;
+  }
+
+  .meta-line {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--paper-dim);
+  }
+
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--ink);
+    padding: 12px 20px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .search {
+    width: 100%;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--paper);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+  }
+  .search::placeholder { color: var(--paper-dim); }
+  .search:focus {
+    outline: none;
+    border-color: var(--brass);
+  }
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .chips::-webkit-scrollbar { display: none; }
+
+  .filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .loc-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    color: var(--paper-dim);
+    cursor: pointer;
+  }
+  .loc-toggle input {
+    accent-color: var(--brass);
+    width: 15px;
+    height: 15px;
+  }
+
+  .select {
+    flex: 1;
+    min-width: 118px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--paper);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    padding: 8px 10px;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+  .select:focus { outline: none; border-color: var(--brass); }
+
+  .price-range {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 140px;
+  }
+  .price-input {
+    width: 100%;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--paper);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    padding: 8px 8px;
+  }
+  .price-input::placeholder { color: var(--paper-dim); }
+  .price-input:focus { outline: none; border-color: var(--brass); }
+  .price-range span {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--paper-dim);
+  }
+
+  .chip {
+    flex: none;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--paper-dim);
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 6px 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .chip.active {
+    color: var(--ink);
+    background: var(--brass);
+    border-color: var(--brass);
+  }
+
+  main {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .feed {
+    padding: 4px 0 0;
+  }
+
+  .card {
+    display: flex;
+    gap: 14px;
+    padding: 16px 20px;
+    border-bottom: 1px dashed var(--line);
+    text-decoration: none;
+    color: inherit;
+    animation: rise 0.25s ease both;
+  }
+  .card:active { background: var(--ink-2); }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card { animation: none; }
+  }
+
+  .thumb {
+    width: 64px;
+    height: 64px;
+    flex: none;
+    border-radius: var(--radius);
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    object-fit: cover;
+    display: block;
+  }
+  .thumb-fallback {
+    width: 64px;
+    height: 64px;
+    flex: none;
+    border-radius: var(--radius);
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Oswald', sans-serif;
+    font-size: 18px;
+    color: var(--moss);
+  }
+
+  .card-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .brand {
+    font-family: 'Oswald', sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 13px;
+    color: var(--brass);
+    margin: 0 0 3px;
+  }
+
+  .title {
+    font-size: 15px;
+    line-height: 1.3;
+    margin: 0 0 6px;
+    color: var(--paper);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .price {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--paper);
+  }
+
+  .category {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--paper-dim);
+  }
+
+  .tag-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex: none;
+  }
+
+  .tag {
+    position: relative;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    background: var(--paper);
+    border-radius: 2px 6px 6px 2px;
+    padding: 5px 10px 5px 14px;
+    transform: rotate(-2deg);
+  }
+  .tag::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--ink);
+  }
+
+  .loc-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10.5px;
+    letter-spacing: 0.04em;
+    color: var(--paper-dim);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 7px;
+  }
+
+  .empty, .loading {
+    padding: 60px 24px;
+    text-align: center;
+    color: var(--paper-dim);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+  .empty .eyebrow, .loading .eyebrow {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  footer {
+    padding: 20px;
+    text-align: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--paper-dim);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Feed Log</div>
+  <h1>Grailed Watch</h1>
+  <div class="meta-line" id="metaLine">Loading…</div>
+</header>
+
+<div class="controls">
+  <input class="search" id="search" type="text" placeholder="Filter by brand or title…">
+  <div class="chips" id="chips"></div>
+  <label class="loc-toggle" id="locToggleLabel">
+    <input type="checkbox" id="locToggle" checked>
+    <span>US &amp; Canada only</span>
+  </label>
+  <div class="filter-row">
+    <select class="select" id="sortSelect">
+      <option value="newest">Newest first</option>
+      <option value="oldest">Oldest first</option>
+      <option value="price-asc">Price: low to high</option>
+      <option value="price-desc">Price: high to low</option>
+    </select>
+    <select class="select" id="timeSelect">
+      <option value="all">Any time</option>
+      <option value="1">Last 24h</option>
+      <option value="7">Last 7 days</option>
+      <option value="14">Last 14 days</option>
+      <option value="30">Last 30 days</option>
+    </select>
+    <div class="price-range">
+      <input class="price-input" id="priceMin" type="number" inputmode="numeric" placeholder="Min $">
+      <span>–</span>
+      <input class="price-input" id="priceMax" type="number" inputmode="numeric" placeholder="Max $">
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="feed" id="feed"></div>
+</main>
+
+<footer>Rolling window · older listings drop off automatically</footer>
+
+<script>
+  let allListings = [];
+  let allCategories = [];
+  let activeCategory = 'All';
+
+  function timeAgo(iso) {
+    if (!iso) return 'never';
+    const diffMs = Date.now() - new Date(iso).getTime();
+    const mins = Math.round(diffMs / 60000);
+    if (mins < 1) return 'just now';
+    if (mins < 60) return mins + 'm ago';
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return hrs + 'h ago';
+    const days = Math.round(hrs / 24);
+    return days + 'd ago';
+  }
+
+  function initials(brand) {
+    return brand.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  }
+
+  function parsePrice(str) {
+    if (!str) return null;
+    const digits = str.replace(/[^0-9.]/g, '');
+    return digits ? parseFloat(digits) : null;
+  }
+
+  function render() {
+    const feed = document.getElementById('feed');
+    const q = document.getElementById('search').value.trim().toLowerCase();
+    const sortBy = document.getElementById('sortSelect').value;
+    const timeRange = document.getElementById('timeSelect').value;
+    const priceMin = parseFloat(document.getElementById('priceMin').value);
+    const priceMax = parseFloat(document.getElementById('priceMax').value);
+    const hasPriceFilter = !isNaN(priceMin) || !isNaN(priceMax);
+    const cutoff = timeRange === 'all' ? null : Date.now() - Number(timeRange) * 86400000;
+    const locOnly = document.getElementById('locToggle').checked;
+
+    let filtered = allListings.filter(item => {
+      const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
+      const matchesQuery = !q || item.brand.toLowerCase().includes(q) || item.title.toLowerCase().includes(q);
+      const matchesTime = !cutoff || new Date(item.first_seen).getTime() >= cutoff;
+      // UNKNOWN passes even with the toggle on — an unverified selector
+      // failing shouldn't hide items we can't actually classify.
+      const matchesLocation = !locOnly || item.location === 'US' || item.location === 'CA' || item.location === 'UNKNOWN';
+
+      let matchesPrice = true;
+      if (hasPriceFilter) {
+        const p = parsePrice(item.price);
+        if (p === null) matchesPrice = false;
+        else {
+          if (!isNaN(priceMin) && p < priceMin) matchesPrice = false;
+          if (!isNaN(priceMax) && p > priceMax) matchesPrice = false;
+        }
+      }
+
+      return matchesCategory && matchesQuery && matchesTime && matchesPrice && matchesLocation;
+    });
+
+    filtered.sort((a, b) => {
+      if (sortBy === 'oldest') return new Date(a.first_seen) - new Date(b.first_seen);
+      if (sortBy === 'newest') return new Date(b.first_seen) - new Date(a.first_seen);
+      const pa = parsePrice(a.price);
+      const pb = parsePrice(b.price);
+      if (sortBy === 'price-asc') return (pa ?? Infinity) - (pb ?? Infinity);
+      if (sortBy === 'price-desc') return (pb ?? -Infinity) - (pa ?? -Infinity);
+      return 0;
+    });
+
+    if (filtered.length === 0) {
+      feed.innerHTML = `
+        <div class="empty">
+          <span class="eyebrow">Nothing here</span>
+          ${allListings.length === 0
+            ? 'No listings yet. The next scheduled scrape will check every brand and size automatically.'
+            : 'Nothing matches that filter right now.'}
+        </div>`;
+      return;
+    }
+
+    feed.innerHTML = filtered.map(item => `
+      <a class="card" href="${item.link}" target="_blank" rel="noopener">
+        ${item.image
+          ? `<img class="thumb" src="${item.image}" alt="" loading="lazy" onerror="this.outerHTML='<div class=&quot;thumb-fallback&quot;>${initials(item.brand)}</div>'">`
+          : `<div class="thumb-fallback">${initials(item.brand)}</div>`}
+        <div class="card-body">
+          <p class="brand">${item.brand}</p>
+          <p class="title">${item.title || '(no title)'}</p>
+          <div class="row">
+            <span class="price">${item.price || '—'}</span>
+            <span class="category">${item.category || ''}</span>
+          </div>
+        </div>
+        <div class="tag-stack">
+          <div class="tag">${item.size || '—'}</div>
+          <div class="loc-tag" title="${item.location_raw || 'no location signal found'}">${item.location === 'UNKNOWN' ? '?' : item.location}</div>
+        </div>
+      </a>
+    `).join('');
+  }
+
+  function buildChips() {
+    // Prefer the full category list the scraper writes (so all
+    // categories always show as filters, even with zero current
+    // matches). Fall back to deriving from listings for older data.
+    const cats = ['All', ...(allCategories.length ? allCategories : [...new Set(allListings.map(l => l.category).filter(Boolean))])];
+    const chips = document.getElementById('chips');
+    chips.innerHTML = cats.map(c =>
+      `<div class="chip${c === activeCategory ? ' active' : ''}" data-cat="${c}">${c}</div>`
+    ).join('');
+    chips.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        activeCategory = chip.dataset.cat;
+        buildChips();
+        render();
+      });
+    });
+  }
+
+  async function load() {
+    try {
+      const res = await fetch('./listings.json?t=' + Date.now());
+      const data = await res.json();
+      allListings = data.listings || [];
+      allCategories = data.categories || [];
+      document.getElementById('metaLine').textContent =
+        `${allListings.length} listing${allListings.length === 1 ? '' : 's'} · updated ${timeAgo(data.updated_at)}`;
+      buildChips();
+      render();
+    } catch (e) {
+      document.getElementById('feed').innerHTML = `
+        <div class="empty">
+          <span class="eyebrow">Couldn't load feed</span>
+          Check that listings.json is present next to this page.
+        </div>`;
+      document.getElementById('metaLine').textContent = 'Load failed';
+    }
+  }
+
+  document.getElementById('search').addEventListener('input', render);
+  document.getElementById('sortSelect').addEventListener('change', render);
+  document.getElementById('timeSelect').addEventListener('change', render);
+  document.getElementById('priceMin').addEventListener('input', render);
+  document.getElementById('priceMax').addEventListener('input', render);
+  document.getElementById('locToggle').addEventListener('change', render);
+  load();
+</script>
+
+</body>
+</html>
